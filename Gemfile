@@ -6,3 +6,4 @@ gem('pry')
 gem('capybara')
 gem('sinatra-contrib')
 gem 'rb-readline'
+gem ('pg')

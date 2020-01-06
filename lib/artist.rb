@@ -1,59 +1,75 @@
 class Artist
-  attr_reader :name, :genre, :id, :stage_id
-  @@artist_list = {}
-  @@rows = 0
+  attr_reader :id
+  attr_accessor :name, :genre, :stage_id
 
-  def initialize(name, id, genre, stage_id)
-    @name = name
-    @id = id || @@rows += 1
-    @genre = genre
-    @stage_id = stage_id
+  def initialize(attributes)
+    @name = attributes.fetch(:name)
+    @stage_id = attributes.fetch(:stage_id)
+    @id = attributes.fetch(:id)
+    @genre = attributes.fetch(:genre)
   end
 
   def ==(artist_to_compare)
-    (self.name() == artist_to_compare.name()) && (self.genre() == artist_to_compare.genre())
+    self.name().downcase().eql?(artist_to_compare.name.downcase()) &&
+    self.genre().downcase().eql?(artist_to_compare.genre.downcase()) &&
+    self.stage_id().eql?(artist_to_compare.stage_id())
   end
 
   def self.all
-    @@artist_list.values
+    returned_artists = DB.exec("SELECT * FROM artists;")
+    artists_array = []
+    returned_artists.each() do |artist|
+      name = artist.fetch("name")
+      id = artist.fetch("id").to_i
+      stage_id = artist.fetch("stage_id").to_i
+      genre = artist.fetch("genre")
+      artists_array.push(Artist.new({:name => name, :stage_id => stage_id, :id => id, :genre => genre}))
+    end
+    artists_array
   end
 
   def save
-    @@artist_list[self.id] = Artist.new(self.name, self.id, self.genre, self.stage_id)
+    result = DB.exec("INSERT INTO artists (name, stage_id, genre) VALUES ('#{@name}', #{@stage_id}, '#{@genre}') RETURNING id;")
+    @id = result.first().fetch("id").to_i
   end
 
   def self.find(id)
-    @@artist_list[id]
+    artist = DB.exec("SELECT * FROM artists WHERE id = #{id};").first
+    name = artist.fetch("name")
+    genre = artist.fetch("genre")
+    stage_id = artist.fetch("stage_id").to_i
+    id = artist.fetch("id").to_i
+    Artist.new({:name => name, :stage_id => stage_id, :id => id, :genre => genre})
   end
 
-  def self.find_by_stage(stage_id)
-    artists = []
-    @@artist_list.values.each do |artist|
-      if artist.stage_id == stage_id
-        artists.push(artist)
-      end
-    end
-    return artists
-  end
-
-  def stage
-    Stage.find(self.stage_id)
-  end
-
-  def update(name, genre)
+  def update(name, genre, stage_id)
     @name = name
+    @stage_id = stage_id
     @genre = genre
-    # @stage_id = stage_id
-
-    @@artist_list[self.id] = Artist.new(self.name, self.id, self.genre, self.stage_id)
+    DB.exec("UPDATE artists SET name = '#{@name}', stage_id = #{@stage_id}, genre = '#{@genre}' WHERE id = #{@id};")
   end
 
   def delete
-    @@artist_list.delete(self.id)
+    DB.exec("DELETE FROM artists WHERE id = #{@id};")
   end
 
   def self.clear
-    @@artist_list = {}
+    DB.exec("DELETE FROM artists *;")
   end
 
+  def self.find_by_stage(stage_id)
+    artists_array = []
+    returned_artists = DB.exec("SELECT * FROM artists WHERE stage_id = #{stage_id};")
+    returned_artists.each() do |artist|
+      name = artist.fetch("name")
+      genre = artist.fetch("genre")
+      id = artist.fetch("id").to_i
+      artists_array.push(Artist.new({:name => name, :genre => genre, :stage_id => stage_id, :id => id}))
+    end
+    artists_array
+  end
+
+  def stage
+    stage.find(@stage_id)
+  end
 end

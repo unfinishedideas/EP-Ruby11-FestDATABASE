@@ -1,46 +1,41 @@
 require 'rspec'
 require 'stage'
+require('spec_helper')
 
 describe '#Stage' do
 
-  before(:each) do
-    Stage.clear()
-  end
-
-  describe('.all') do
-    it('shows all the stages') do
-      stage1 = Stage.new(nil, "Shire", "Fangor", "Friday")
-      stage1.save
-      stage2 = Stage.new(nil, "Quickbeam", "Lothlorian", "Satrday")
-      stage2.save
-      expect(Stage.all).to(eq([stage1, stage2]))
+  describe('#save') do
+    it("Saves stage") do
+      stage = Stage.new({:id => nil, :name => "Nerd Stage", :location => "Shire"})
+      stage.save()
+      stage2 = Stage.new({:id => nil, :name => "Cool Stage", :location => "Your Moms House"})
+      stage2.save()
+      expect(Stage.all).to(eq([stage, stage2]))
     end
   end
 
-  describe('#save') do
-    it('should save the stage to the array') do
-      stage1 = Stage.new(nil, "Shire", "Fangor", "Friday")
-      stage1.save
-      expect(Stage.all).to(eq([stage1]))
+  describe('.all') do
+    it("returns an empty array when there are no stages") do
+      expect(Stage.all).to(eq([]))
     end
   end
 
   describe('#==') do
     it('should be the same stage if they have the same attributes') do
-      stage1 = Stage.new(nil, "Shire", "Fangor", "Friday")
-      stage1.save
-      stage2 = Stage.new(nil, "Shire", "Fangor", "Friday")
-      stage2.save
-      expect(stage1).to(eq(stage2))
+      stage = Stage.new({:id => nil, :name => "Nerd Stage", :location => "Shire"})
+      stage.save()
+      stage2 = Stage.new({:id => nil, :name => "Nerd Stage", :location => "Shire"})
+      stage2.save()
+      expect(stage).to(eq(stage2))
     end
   end
 
   describe('.clear') do
     it('should clear all the stages') do
-      stage1 = Stage.new(nil, "Shire", "Fangor", "Friday")
-      stage1.save
-      stage2 = Stage.new(nil, "Quickbeam", "Lothlorian", "Satrday")
-      stage2.save
+      stage = Stage.new({:id => nil, :name => "Nerd Stage", :location => "Shire"})
+      stage.save()
+      stage2 = Stage.new({:id => nil, :name => "Cool Stage", :location => "Your Moms House"})
+      stage2.save()
       Stage.clear
       expect(Stage.all).to(eq([]))
     end
@@ -48,54 +43,54 @@ describe '#Stage' do
 
   describe('.find') do
     it('should find the stage based on id') do
-      stage1 = Stage.new(nil, "Shire", "Fangor", "Friday")
-      stage1.save
-      stage2 = Stage.new(nil, "Quickbeam", "Lothlorian", "Satrday")
-      stage2.save
-      expect(Stage.find(stage1.id)).to(eq(stage1))
+      stage = Stage.new({:id => nil, :name => "Nerd Stage", :location => "Shire"})
+      stage.save()
+      stage2 = Stage.new({:id => nil, :name => "Cool Stage", :location => "Your Moms House"})
+      stage2.save()
+      expect(Stage.find(stage.id)).to(eq(stage))
     end
   end
 
   describe ('.search') do
     it('should search for the right stage based on name') do
-      stage1 = Stage.new(nil, "Shire", "Fangor", "Friday")
-      stage1.save
-      stage2 = Stage.new(nil, "Quickbeam", "Lothlorian", "Satrday")
-      stage2.save
-      expect(Stage.search("shire")).to(eq([stage1]))
+      stage = Stage.new({:id => nil, :name => "Nerd Stage", :location => "Shire"})
+      stage.save()
+      stage2 = Stage.new({:id => nil, :name => "Cool Stage", :location => "Your Moms House"})
+      stage2.save()
+      expect(Stage.search("Nerd Stage")).to(eq([stage]))
     end
   end
 
   describe('#update') do
     it('should update the stage info') do
-      stage1 = Stage.new(nil, "Shire", "Fangor", "Friday")
-      stage1.save
-      stage1.update("Hobbiten", "Shire", "Friday")
-      expect(stage1.name).to(eq("Hobbiten"))
+      stage = Stage.new({:id => nil, :name => "Nerd Stage", :location => "Shire"})
+      stage.save()
+      stage.update("Hobbiten", "Shire")
+      expect(stage.name).to(eq("Hobbiten"))
     end
   end
 
   describe('#delete') do
     it('should delete the chosen stage') do
-      stage1 = Stage.new(nil, "Shire", "Fangor", "Friday")
-      stage1.save
-      stage2 = Stage.new(nil, "Quickbeam", "Lothlorian", "Satrday")
-      stage2.save
-      stage1.delete
+      stage = Stage.new({:id => nil, :name => "Nerd Stage", :location => "Shire"})
+      stage.save()
+      stage2 = Stage.new({:id => nil, :name => "Cool Stage", :location => "Your Moms House"})
+      stage2.save()
+      stage.delete
       expect(Stage.all).to(eq([stage2]))
     end
   end
 
-  describe('#artists') do
+  describe('#artist') do
     it('should show what artists are playing at the stage') do
       Artist.clear
-      stage1 = Stage.new(nil, "Hobbiton", "Shire", "Friday")
-      stage1.save
-      artist1 = Artist.new("Beyonce", nil, "Hip-hop", stage1.id)
+      stage = Stage.new({:id => nil, :name => "Nerd Stage", :location => "Shire"})
+      stage.save()
+      artist1 = Artist.new({:name => "Beyonce", :id => nil, :genre => "Hip-hop", :stage_id => stage.id})
       artist1.save
-      artist2 = Artist.new("Jay-Z", nil, "Hip-hop", stage1.id)
+      artist2 = Artist.new({:name => "Jay-Z", :id => nil, :genre => "Hip-hop", :stage_id => stage.id})
       artist2.save
-      expect(stage1.artists).to(eq([artist1, artist2]))
+      expect(stage.artists).to(eq([artist1, artist2]))
     end
   end
 
